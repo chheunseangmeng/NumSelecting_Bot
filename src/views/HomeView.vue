@@ -84,7 +84,7 @@ import { useGridStore } from "../stores/gridStore";
 import { useTelegram } from "../composables/useTelegram";
 
 const store = useGridStore();
-const { hapticFeedback, showPopup } = useTelegram();
+const { hapticFeedback, showPopup, sendData, closeMiniApp } = useTelegram();
 
 // Simple array for 2 boxes
 const selectedNumbers = computed(() => {
@@ -113,6 +113,19 @@ const handleSubmit = () => {
 
   store.saveToStorage();
   hapticFeedback("medium");
+
+  const payload = {
+    selectedNumbers: store.sortedNumbers,
+    selectedCount: store.selectedCount,
+    startParam: store.startParam || null,
+    submittedAt: new Date().toISOString(),
+  };
+
+  const sentToBot = sendData(payload);
+  if (sentToBot) {
+    closeMiniApp();
+    return;
+  }
 
   const numbersList = store.sortedNumbers.join(" and ");
   showPopup(`Thank you!\n\nYou selected: ${numbersList}`, "Success!");

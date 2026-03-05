@@ -3,10 +3,11 @@ import { useGridStore } from '../stores/gridStore'
 
 export function useTelegram() {
   const store = useGridStore()
+  const getTelegramWebApp = () => window.Telegram?.WebApp || null
   
   onMounted(() => {
-    if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp
+    const tg = getTelegramWebApp()
+    if (tg) {
       tg.ready()
       tg.expand()
       
@@ -67,9 +68,39 @@ export function useTelegram() {
       window.alert(`${title}\n\n${message}`)
     }
   }
+
+  const sendData = (payload) => {
+    try {
+      const tg = getTelegramWebApp()
+      if (!tg?.sendData) {
+        return false
+      }
+
+      const serializedPayload =
+        typeof payload === 'string' ? payload : JSON.stringify(payload)
+      tg.sendData(serializedPayload)
+      return true
+    } catch (error) {
+      console.warn('Failed to send data to Telegram bot:', error)
+      return false
+    }
+  }
+
+  const closeMiniApp = () => {
+    try {
+      const tg = getTelegramWebApp()
+      if (tg?.close) {
+        tg.close()
+      }
+    } catch (error) {
+      console.warn('Failed to close Telegram Mini App:', error)
+    }
+  }
   
   return {
     hapticFeedback,
-    showPopup
+    showPopup,
+    sendData,
+    closeMiniApp
   }
 }
