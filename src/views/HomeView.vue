@@ -113,21 +113,29 @@ const handleSubmit = () => {
 
   store.saveToStorage();
   hapticFeedback("medium");
+  const numbers = [...store.sortedNumbers];
+  const formattedNumbers = numbers.map((num) => String(num).padStart(2, "0"));
+  const code = formattedNumbers.join("-");
+  const message = `Selected code: ${code}`;
 
   const payload = {
-    selectedNumbers: store.sortedNumbers,
-    selectedCount: store.selectedCount,
+    selectedNumbers: numbers,
+    code,
+    message,
+    selectedCount: numbers.length,
     startParam: store.startParam || null,
     submittedAt: new Date().toISOString(),
   };
 
   const sentToBot = sendData(payload);
   if (sentToBot) {
-    closeMiniApp();
+    setTimeout(() => {
+      closeMiniApp();
+    }, 350);
     return;
   }
 
-  const numbersList = store.sortedNumbers.join(" and ");
+  const numbersList = numbers.join(" and ");
   showPopup(`Thank you!\n\nYou selected: ${numbersList}`, "Success!");
 };
 </script>
