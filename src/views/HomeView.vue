@@ -3,7 +3,7 @@
     <!-- Header -->
     <header class="p-5 text-center bg-[var(--tg-theme-secondary-bg-color)]">
       <h1 class="text-2xl font-bold text-[var(--tg-theme-text-color)]">
-        Num Selecting Bot
+        Choose the number below
       </h1>
       <p class="mt-2 text-sm text-[var(--tg-theme-hint-color)]">
         Select 2 numbers (1-40)
@@ -89,7 +89,7 @@ const { hapticFeedback, showPopup, sendData, closeMiniApp } = useTelegram();
 // Simple array for 2 boxes
 const selectedNumbers = computed(() => {
   const boxes = ["?", "?"];
-  store.sortedNumbers.forEach((num, index) => {
+  store.selectedNumbers.forEach((num, index) => {
     if (index < 2) {
       boxes[index] = num;
     }
@@ -113,7 +113,7 @@ const handleSubmit = () => {
 
   store.saveToStorage();
   hapticFeedback("medium");
-  const numbers = [...store.sortedNumbers];
+  const numbers = [...store.selectedNumbers];
   const formattedNumbers = numbers.map((num) => String(num).padStart(2, "0"));
   const code = formattedNumbers.join("-");
   const message = `Selected code: ${code}`;
@@ -129,9 +129,10 @@ const handleSubmit = () => {
 
   const sentToBot = sendData(payload);
   if (sentToBot) {
+    showPopup("Submitted successfully. Returning to chat...", "Success");
     setTimeout(() => {
       closeMiniApp();
-    }, 350);
+    }, 1000);
     return;
   }
 

@@ -4,6 +4,10 @@ import { useGridStore } from '../stores/gridStore'
 export function useTelegram() {
   const store = useGridStore()
   const getTelegramWebApp = () => window.Telegram?.WebApp || null
+  const isTelegramContext = () => {
+    const tg = getTelegramWebApp()
+    return Boolean(tg && typeof tg.initData === 'string' && tg.initData.length > 0)
+  }
   
   onMounted(() => {
     const tg = getTelegramWebApp()
@@ -42,7 +46,7 @@ export function useTelegram() {
   
   const hapticFeedback = (style = 'light') => {
     try {
-      if (window.Telegram?.WebApp?.HapticFeedback) {
+      if (isTelegramContext() && window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred(style)
       } else {
         console.log('Haptic feedback (fallback):', style)
@@ -54,7 +58,7 @@ export function useTelegram() {
   
   const showPopup = (message, title = 'Message') => {
     try {
-      if (window.Telegram?.WebApp?.showPopup) {
+      if (isTelegramContext() && window.Telegram?.WebApp?.showPopup) {
         window.Telegram.WebApp.showPopup({
           title: title,
           message: message,
@@ -72,7 +76,7 @@ export function useTelegram() {
   const sendData = (payload) => {
     try {
       const tg = getTelegramWebApp()
-      if (!tg?.sendData) {
+      if (!isTelegramContext() || !tg?.sendData) {
         return false
       }
 
@@ -89,7 +93,7 @@ export function useTelegram() {
   const closeMiniApp = () => {
     try {
       const tg = getTelegramWebApp()
-      if (tg?.close) {
+      if (isTelegramContext() && tg?.close) {
         tg.close()
       }
     } catch (error) {

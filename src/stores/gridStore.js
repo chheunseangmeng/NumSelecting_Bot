@@ -27,7 +27,6 @@ export const useGridStore = defineStore('grid', () => {
   function selectNumber(number) {
     if (!selectedNumbers.value.includes(number) && selectedNumbers.value.length < MAX_SELECTION) {
       selectedNumbers.value.push(number)
-      selectedNumbers.value.sort((a, b) => a - b)
     }
   }
   
