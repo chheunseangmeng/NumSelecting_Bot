@@ -4,11 +4,6 @@ import { useGridStore } from '../stores/gridStore'
 export function useTelegram() {
   const store = useGridStore()
   const getTelegramWebApp = () => window.Telegram?.WebApp || null
-  const isTelegramClient = () => /telegram/i.test(window.navigator?.userAgent || '')
-  const isTelegramContext = () => {
-    const tg = getTelegramWebApp()
-    return Boolean(tg && isTelegramClient())
-  }
   
   onMounted(() => {
     const tg = getTelegramWebApp()
@@ -44,7 +39,7 @@ export function useTelegram() {
   
   const hapticFeedback = (style = 'light') => {
     try {
-      if (isTelegramContext() && window.Telegram?.WebApp?.HapticFeedback) {
+      if (window.Telegram?.WebApp?.HapticFeedback) {
         window.Telegram.WebApp.HapticFeedback.impactOccurred(style)
       } else {
         console.log('Haptic feedback (fallback):', style)
@@ -57,7 +52,7 @@ export function useTelegram() {
   const showPopup = (message, title = 'Message') =>
     new Promise((resolve) => {
       try {
-        if (isTelegramContext() && window.Telegram?.WebApp?.showPopup) {
+        if (window.Telegram?.WebApp?.showPopup) {
           window.Telegram.WebApp.showPopup(
             {
               title,
@@ -82,7 +77,8 @@ export function useTelegram() {
   const sendData = (payload) => {
     try {
       const tg = getTelegramWebApp()
-      if (!isTelegramContext() || !tg?.sendData) {
+      if (!tg?.sendData) {
+        console.warn('sendData unavailable: missing Telegram WebApp sendData API')
         return false
       }
 
@@ -99,7 +95,7 @@ export function useTelegram() {
   const closeMiniApp = () => {
     try {
       const tg = getTelegramWebApp()
-      if (isTelegramContext() && tg?.close) {
+      if (tg?.close) {
         tg.close()
       }
     } catch (error) {
