@@ -4,25 +4,25 @@ import { useGridStore } from '../stores/gridStore'
 export function useTelegram() {
   const store = useGridStore()
   const getTelegramWebApp = () => window.Telegram?.WebApp || null
-  
+
   onMounted(() => {
     const tg = getTelegramWebApp()
     if (tg) {
       tg.ready()
       tg.expand()
-      
+
       // Save user to store
       const user = tg.initDataUnsafe?.user
       if (user) {
         store.setUser(user)
       }
-      
+
       // Save start param to store
       const startParam = tg.initDataUnsafe?.start_param || ''
       if (startParam) {
         store.setStartParam(startParam)
       }
-      
+
       // Apply Telegram theme
       const theme = tg.themeParams
       if (theme) {
@@ -30,13 +30,13 @@ export function useTelegram() {
           document.documentElement.style.setProperty(`--tg-theme-${key}`, theme[key])
         })
       }
-      
+
       console.log('Telegram Mini App initialized', { user, startParam })
     } else {
       console.log('Running outside Telegram - using fallback mode')
     }
   })
-  
+
   const hapticFeedback = (style = 'light') => {
     try {
       if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -48,7 +48,7 @@ export function useTelegram() {
       console.warn('Haptic feedback failed:', error)
     }
   }
-  
+
   const showPopup = (message, title = 'Message') =>
     new Promise((resolve) => {
       try {
@@ -74,20 +74,26 @@ export function useTelegram() {
       }
     })
 
-  const sendData = (payload) => {
+  const submitToBot = async (payload) => {
     try {
       const tg = getTelegramWebApp()
-      if (!tg?.sendData) {
-        console.warn('sendData unavailable: missing Telegram WebApp sendData API')
+      const chatId = tg?.initDataUnsafe?.user?.id
+
+      if (!chatId) {
+        console.warn('submitToBot: no chat_id available')
         return false
       }
 
-      const serializedPayload =
-        typeof payload === 'string' ? payload : JSON.stringify(payload)
-      tg.sendData(serializedPayload)
-      return true
+      const res = await fetch('https://middlingly-uncollapsible-samir.ngrok-free.dev/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, chat_id: chatId }),
+      })
+
+      const result = await res.json()
+      return result.status === 'ok'
     } catch (error) {
-      console.warn('Failed to send data to Telegram bot:', error)
+      console.warn('Failed to submit to bot:', error)
       return false
     }
   }
@@ -102,11 +108,11 @@ export function useTelegram() {
       console.warn('Failed to close Telegram Mini App:', error)
     }
   }
-  
+
   return {
     hapticFeedback,
     showPopup,
-    sendData,
+    submitToBot,
     closeMiniApp
   }
 }
