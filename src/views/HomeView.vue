@@ -111,7 +111,6 @@ const submitButtonText = computed(() => {
 const handleSubmit = async () => {
   if (!canSubmit.value) return;
 
-  store.saveToStorage();
   hapticFeedback("medium");
   const numbers = [...store.selectedNumbers];
   const formattedNumbers = numbers.map((num) => String(num).padStart(2, "0"));
@@ -129,6 +128,7 @@ const handleSubmit = async () => {
 
   const sentToBot = sendData(payload);
   if (sentToBot) {
+    store.clearSelection();
     await showPopup("Submitted successfully. Returning to chat...", "Success");
     closeMiniApp();
     return;
@@ -136,5 +136,6 @@ const handleSubmit = async () => {
 
   const numbersList = numbers.join(" and ");
   await showPopup(`Thank you!\n\nYou selected: ${numbersList}`, "Success!");
+  store.clearSelection();
 };
 </script>

@@ -57,27 +57,6 @@ export const useGridStore = defineStore('grid', () => {
     startParam.value = param
   }
   
-  function saveToStorage() {
-    try {
-      localStorage.setItem('selectedNumbers', JSON.stringify(selectedNumbers.value))
-    } catch (error) {
-      console.warn('Unable to save selected numbers to localStorage:', error)
-    }
-  }
-  
-  function loadFromStorage() {
-    try {
-      const saved = localStorage.getItem('selectedNumbers')
-      if (!saved) return
-      const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed)) {
-        selectedNumbers.value = parsed
-      }
-    } catch (error) {
-      console.warn('Unable to load selected numbers from localStorage:', error)
-    }
-  }
-  
   return {
     // State
     selectedNumbers,
@@ -98,7 +77,5 @@ export const useGridStore = defineStore('grid', () => {
     clearSelection,
     setUser,
     setStartParam,
-    saveToStorage,
-    loadFromStorage
   }
 })

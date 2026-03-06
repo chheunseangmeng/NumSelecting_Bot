@@ -35,9 +35,6 @@ export function useTelegram() {
         })
       }
       
-      // Load saved selections
-      store.loadFromStorage()
-      
       console.log('Telegram Mini App initialized', { user, startParam })
     } else {
       console.log('Running outside Telegram - using fallback mode')
