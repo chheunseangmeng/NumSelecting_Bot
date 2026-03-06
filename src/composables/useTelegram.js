@@ -1,55 +1,58 @@
-import { onMounted } from 'vue'
-import { useGridStore } from '../stores/gridStore'
+import { onMounted } from "vue";
+import { useGridStore } from "../stores/gridStore";
 
 export function useTelegram() {
-  const store = useGridStore()
-  const getTelegramWebApp = () => window.Telegram?.WebApp || null
+  const store = useGridStore();
+  const getTelegramWebApp = () => window.Telegram?.WebApp || null;
 
   onMounted(() => {
-    const tg = getTelegramWebApp()
+    const tg = getTelegramWebApp();
     if (tg) {
-      tg.ready()
-      tg.expand()
+      tg.ready();
+      tg.expand();
 
       // Save user to store
-      const user = tg.initDataUnsafe?.user
+      const user = tg.initDataUnsafe?.user;
       if (user) {
-        store.setUser(user)
+        store.setUser(user);
       }
 
       // Save start param to store
-      const startParam = tg.initDataUnsafe?.start_param || ''
+      const startParam = tg.initDataUnsafe?.start_param || "";
       if (startParam) {
-        store.setStartParam(startParam)
+        store.setStartParam(startParam);
       }
 
       // Apply Telegram theme
-      const theme = tg.themeParams
+      const theme = tg.themeParams;
       if (theme) {
-        Object.keys(theme).forEach(key => {
-          document.documentElement.style.setProperty(`--tg-theme-${key}`, theme[key])
-        })
+        Object.keys(theme).forEach((key) => {
+          document.documentElement.style.setProperty(
+            `--tg-theme-${key}`,
+            theme[key],
+          );
+        });
       }
 
-      console.log('Telegram Mini App initialized', { user, startParam })
+      console.log("Telegram Mini App initialized", { user, startParam });
     } else {
-      console.log('Running outside Telegram - using fallback mode')
+      console.log("Running outside Telegram - using fallback mode");
     }
-  })
+  });
 
-  const hapticFeedback = (style = 'light') => {
+  const hapticFeedback = (style = "light") => {
     try {
       if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred(style)
+        window.Telegram.WebApp.HapticFeedback.impactOccurred(style);
       } else {
-        console.log('Haptic feedback (fallback):', style)
+        console.log("Haptic feedback (fallback):", style);
       }
     } catch (error) {
-      console.warn('Haptic feedback failed:', error)
+      console.warn("Haptic feedback failed:", error);
     }
-  }
+  };
 
-  const showPopup = (message, title = 'Message') =>
+  const showPopup = (message, title = "Message") =>
     new Promise((resolve) => {
       try {
         if (window.Telegram?.WebApp?.showPopup) {
@@ -57,62 +60,77 @@ export function useTelegram() {
             {
               title,
               message,
-              buttons: [{ type: 'ok', id: 'ok' }]
+              buttons: [{ type: "ok", id: "ok" }],
             },
             (buttonId) => {
-              resolve(buttonId || 'ok')
-            }
-          )
+              resolve(buttonId || "ok");
+            },
+          );
         } else {
-          window.alert(`${title}\n\n${message}`)
-          resolve('ok')
+          window.alert(`${title}\n\n${message}`);
+          resolve("ok");
         }
       } catch (error) {
-        console.warn('Telegram popup failed, using alert fallback:', error)
-        window.alert(`${title}\n\n${message}`)
-        resolve('ok')
+        console.warn("Telegram popup failed, using alert fallback:", error);
+        window.alert(`${title}\n\n${message}`);
+        resolve("ok");
       }
-    })
+    });
 
   const submitToBot = async (payload) => {
     try {
-      const tg = getTelegramWebApp()
-      const chatId = tg?.initDataUnsafe?.user?.id
+      const tg = getTelegramWebApp();
+      const chatId = tg?.initDataUnsafe?.user?.id;
 
       if (!chatId) {
-        console.warn('submitToBot: no chat_id available')
-        return false
+        console.warn("submitToBot: no chat_id available");
+        return false;
       }
 
-      const res = await fetch('https://middlingly-uncollapsible-samir.ngrok-free.dev/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, chat_id: chatId }),
-      })
+      // const res = await fetch(
+      //   "https://middlingly-uncollapsible-samir.ngrok-free.dev/submit",
+      //   {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ ...payload, chat_id: chatId }),
+      //   },
+      // );
+      
+      const res = await fetch(
+        "https://middlingly-uncollapsible-samir.ngrok-free.dev/submit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+          body: JSON.stringify({ ...payload, chat_id: chatId }),
+        },
+      );
 
-      const result = await res.json()
-      return result.status === 'ok'
+      const result = await res.json();
+      return result.status === "ok";
     } catch (error) {
-      console.warn('Failed to submit to bot:', error)
-      return false
+      console.warn("Failed to submit to bot:", error);
+      return false;
     }
-  }
+  };
 
   const closeMiniApp = () => {
     try {
-      const tg = getTelegramWebApp()
+      const tg = getTelegramWebApp();
       if (tg?.close) {
-        tg.close()
+        tg.close();
       }
     } catch (error) {
-      console.warn('Failed to close Telegram Mini App:', error)
+      console.warn("Failed to close Telegram Mini App:", error);
     }
-  }
+  };
 
   return {
     hapticFeedback,
     showPopup,
     submitToBot,
-    closeMiniApp
-  }
+    closeMiniApp,
+  };
 }
