@@ -4,9 +4,10 @@ import { useGridStore } from '../stores/gridStore'
 export function useTelegram() {
   const store = useGridStore()
   const getTelegramWebApp = () => window.Telegram?.WebApp || null
+  const isTelegramClient = () => /telegram/i.test(window.navigator?.userAgent || '')
   const isTelegramContext = () => {
     const tg = getTelegramWebApp()
-    return Boolean(tg && typeof tg.initData === 'string' && tg.initData.length > 0)
+    return Boolean(tg && isTelegramClient())
   }
   
   onMounted(() => {

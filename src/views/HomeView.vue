@@ -134,8 +134,10 @@ const handleSubmit = async () => {
     return;
   }
 
-  const numbersList = numbers.join(" and ");
-  await showPopup(`Thank you!\n\nYou selected: ${numbersList}`, "Success!");
+  await showPopup(
+    "Unable to send data to bot.\nPlease open Mini App from the chat button: 🚀 Open App",
+    "Send Failed"
+  );
   store.clearSelection();
 };
 </script>
