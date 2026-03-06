@@ -108,7 +108,7 @@ const submitButtonText = computed(() => {
   return "Submit";
 });
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (!canSubmit.value) return;
 
   store.saveToStorage();
@@ -129,14 +129,12 @@ const handleSubmit = () => {
 
   const sentToBot = sendData(payload);
   if (sentToBot) {
-    showPopup("Submitted successfully. Returning to chat...", "Success");
-    setTimeout(() => {
-      closeMiniApp();
-    }, 1000);
+    await showPopup("Submitted successfully. Returning to chat...", "Success");
+    closeMiniApp();
     return;
   }
 
   const numbersList = numbers.join(" and ");
-  showPopup(`Thank you!\n\nYou selected: ${numbersList}`, "Success!");
+  await showPopup(`Thank you!\n\nYou selected: ${numbersList}`, "Success!");
 };
 </script>

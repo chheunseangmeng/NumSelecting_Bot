@@ -56,22 +56,30 @@ export function useTelegram() {
     }
   }
   
-  const showPopup = (message, title = 'Message') => {
-    try {
-      if (isTelegramContext() && window.Telegram?.WebApp?.showPopup) {
-        window.Telegram.WebApp.showPopup({
-          title: title,
-          message: message,
-          buttons: [{ type: 'ok' }]
-        })
-      } else {
+  const showPopup = (message, title = 'Message') =>
+    new Promise((resolve) => {
+      try {
+        if (isTelegramContext() && window.Telegram?.WebApp?.showPopup) {
+          window.Telegram.WebApp.showPopup(
+            {
+              title,
+              message,
+              buttons: [{ type: 'ok', id: 'ok' }]
+            },
+            (buttonId) => {
+              resolve(buttonId || 'ok')
+            }
+          )
+        } else {
+          window.alert(`${title}\n\n${message}`)
+          resolve('ok')
+        }
+      } catch (error) {
+        console.warn('Telegram popup failed, using alert fallback:', error)
         window.alert(`${title}\n\n${message}`)
+        resolve('ok')
       }
-    } catch (error) {
-      console.warn('Telegram popup failed, using alert fallback:', error)
-      window.alert(`${title}\n\n${message}`)
-    }
-  }
+    })
 
   const sendData = (payload) => {
     try {
